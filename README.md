@@ -2,6 +2,8 @@
 
 A polished, mobile-first smartphone shopping demo built with HTML5, CSS3 and vanilla JavaScript.
 
+**Live demo:** https://ridwaan-mobile-store.vercel.app
+
 ## Features
 
 - Home, Shop, Cart, Rewards and Profile screens
