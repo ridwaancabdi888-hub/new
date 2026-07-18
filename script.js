@@ -34,6 +34,7 @@ let shop = {query:'',brand:'All',maxPrice:1500,availability:'all',sort:'featured
 let selected = null;
 let detailChoice = {storage:'',color:'',qty:1};
 let goldShown = false;
+let installPromptEvent = null;
 const app = document.getElementById('appView');
 const nav = document.getElementById('bottomNav');
 const modalRoot = document.getElementById('modalRoot');
@@ -49,6 +50,7 @@ function currentUser(){return state.users.find(u=>u.id===state.session?.userId&&
 function isAdmin(){return ['admin','manager'].includes(currentUser()?.role)}
 
 function init(){
+  setupPWA();
   document.body.classList.toggle('dark',state.theme==='dark');
   updateClock(); setInterval(updateClock,30000);
   save();
@@ -57,6 +59,23 @@ function init(){
   else if(['admin','manager'].includes(user.role)) setPage('admin')
   else {renderNav();renderSkeleton();setTimeout(()=>setPage('home'),650)}
   window.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+}
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function updateInstallUI(){const button=document.getElementById('pwaInstallFab');if(button)button.hidden=isStandalone()}
+function setupPWA(){
+  updateInstallUI();
+  if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}),{once:true});
+  window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();installPromptEvent=event;updateInstallUI()});
+  window.addEventListener('appinstalled',()=>{installPromptEvent=null;updateInstallUI();toast('Ridwaan Store installed successfully')});
+}
+async function installApp(){
+  if(isStandalone()){toast('Ridwaan Store is already installed');return}
+  if(installPromptEvent){
+    const prompt=installPromptEvent;prompt.prompt();const choice=await prompt.userChoice;installPromptEvent=null;
+    if(choice.outcome==='accepted')toast('Installing Ridwaan Store…');else toast('Installation cancelled','!');
+    return;
+  }
+  openSheet(`<div class="sheet-head"><h2>Install Mobile App</h2><button class="icon-btn close" onclick="closeSheet()" aria-label="Close">${icon('x')}</button></div><div class="install-guide"><div class="install-app-mark">R</div><h3>Ridwaan Mobile Store</h3><p>Install the store on your phone for a full-screen app experience and offline access.</p><ol><li><b>Samsung Internet:</b> tap the menu ☰, then <b>Add page to</b> → <b>Home screen</b>.</li><li><b>Google Chrome:</b> tap ⋮, then <b>Install app</b> or <b>Add to Home screen</b>.</li><li><b>iPhone Safari:</b> tap Share, then <b>Add to Home Screen</b>.</li></ol></div><button class="primary-btn" onclick="closeSheet()">Got it</button>`);
 }
 function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}).replace(/^0/,'')}
 function renderSkeleton(){
@@ -213,7 +232,7 @@ function redeemPoints(){if(state.points<100)return toast('You need at least 100 
 
 function renderProfile(){
   const user=currentUser();const orders=customerOrders();
-  app.innerHTML=`${header('Settings')}<section class="profile-card"><div class="avatar">${safe((user?.name||'R')[0].toUpperCase())}</div><div><h2>${safe(user?.name||state.profile.name)}</h2><p>${safe(user?.email||state.profile.email)}</p><span class="role-pill">Customer</span></div><button onclick="editProfile()">Edit</button></section><div class="settings-section"><p class="section-label">My account</p><div class="settings-card">${settingRow('shop','Order history',`${orders.length} order${orders.length===1?'':'s'}`,'showOrders()')}${settingRow('heart','Wishlist',`${state.wishlist.length} saved phones`,'showWishlist()')}${settingRow('home','Saved addresses',state.profile.address?'1 saved address':'No saved address','editAddress()')}${settingRow('cart','Payment methods','Cash, Zaad, eDahab & cards','showPayments()')}</div></div><div class="settings-section"><p class="section-label">Preferences</p><div class="settings-card">${toggleRow('bell','Push notifications','Order and offer updates','notifications')}${toggleRow('user','Biometric lock','Visual demo setting','biometric')}${toggleRow('sun','Dark mode','Warm midnight appearance','theme')}<label class="settings-row"><span class="settings-icon">🌐</span><span class="settings-copy"><b>Language</b><span>App display language</span></span><select class="language-select" onchange="state.language=this.value;save();toast('Language preference saved')"><option ${state.language==='English'?'selected':''}>English</option><option ${state.language==='Somali'?'selected':''}>Somali</option><option ${state.language==='Arabic'?'selected':''}>Arabic</option></select></label></div></div><div class="settings-section"><p class="section-label">Support</p><div class="settings-card">${settingRow('gift','Help and support','FAQs and contact options','showHelp()')}${settingRow('user','About this app','Version 2.0.0','showAbout()')}<button class="settings-row logout" onclick="logoutDemo()"><span class="settings-icon">↪</span><span class="settings-copy"><b>Log out</b><span>End this signed-in session</span></span>${icon('chevron','chev')}</button></div></div>`;
+  app.innerHTML=`${header('Settings')}<section class="profile-card"><div class="avatar">${safe((user?.name||'R')[0].toUpperCase())}</div><div><h2>${safe(user?.name||state.profile.name)}</h2><p>${safe(user?.email||state.profile.email)}</p><span class="role-pill">Customer</span></div><button onclick="editProfile()">Edit</button></section><div class="settings-section"><p class="section-label">My account</p><div class="settings-card">${settingRow('shop','Order history',`${orders.length} order${orders.length===1?'':'s'}`,'showOrders()')}${settingRow('heart','Wishlist',`${state.wishlist.length} saved phones`,'showWishlist()')}${settingRow('home','Saved addresses',state.profile.address?'1 saved address':'No saved address','editAddress()')}${settingRow('cart','Payment methods','Cash, Zaad, eDahab & cards','showPayments()')}</div></div><div class="settings-section"><p class="section-label">App</p><div class="settings-card">${settingRow('home','Install mobile app',isStandalone()?'Installed on this device':'Add to your Home Screen','installApp()')}</div></div><div class="settings-section"><p class="section-label">Preferences</p><div class="settings-card">${toggleRow('bell','Push notifications','Order and offer updates','notifications')}${toggleRow('user','Biometric lock','Visual demo setting','biometric')}${toggleRow('sun','Dark mode','Warm midnight appearance','theme')}<label class="settings-row"><span class="settings-icon">🌐</span><span class="settings-copy"><b>Language</b><span>App display language</span></span><select class="language-select" onchange="state.language=this.value;save();toast('Language preference saved')"><option ${state.language==='English'?'selected':''}>English</option><option ${state.language==='Somali'?'selected':''}>Somali</option><option ${state.language==='Arabic'?'selected':''}>Arabic</option></select></label></div></div><div class="settings-section"><p class="section-label">Support</p><div class="settings-card">${settingRow('gift','Help and support','FAQs and contact options','showHelp()')}${settingRow('user','About this app','Version 2.1.0','showAbout()')}<button class="settings-row logout" onclick="logoutDemo()"><span class="settings-icon">↪</span><span class="settings-copy"><b>Log out</b><span>End this signed-in session</span></span>${icon('chevron','chev')}</button></div></div>`;
 }
 function settingRow(ic,title,sub,fn){return `<button class="settings-row" onclick="${fn}"><span class="settings-icon">${icon(ic)}</span><span class="settings-copy"><b>${title}</b><span>${sub}</span></span>${icon('chevron','chev')}</button>`}
 function toggleRow(ic,title,sub,key){const on=key==='theme'?state.theme==='dark':state[key];return `<button class="settings-row" onclick="toggleSetting('${key}')"><span class="settings-icon">${icon(ic)}</span><span class="settings-copy"><b>${title}</b><span>${sub}</span></span><span class="toggle ${on?'on':''}" role="switch" aria-checked="${on}"><i></i></span></button>`}
@@ -226,7 +245,7 @@ function showOrders(){const orders=customerOrders();openSheet(`<div class="sheet
 function showWishlist(){const list=PRODUCTS.filter(p=>state.wishlist.includes(p.id));openSheet(`<div class="sheet-head"><h2>Wishlist</h2><button class="icon-btn close" onclick="closeSheet()">${icon('x')}</button></div>${list.length?`<div class="product-grid">${list.map(productCard).join('')}</div>`:`<div class="empty-state"><div class="empty-illustration">♡</div><h2>Nothing saved yet</h2><p>Tap the heart on any phone to save it.</p></div>`}`)}
 function showPayments(){infoSheet('Payment methods','At checkout you can choose Cash on Delivery, Zaad, eDahab, or Credit/Debit Card. This front-end demo never processes real payments.')}
 function showHelp(){openSheet(`<div class="sheet-head"><h2>Help & support</h2><button class="icon-btn close" onclick="closeSheet()">${icon('x')}</button></div><div class="benefit-list"><button class="benefit" onclick="infoSheet('Delivery information','Orders in Hargeisa normally arrive the same day. Other locations are shown as a demonstration only.')"><span class="benefit-icon">🚚</span><span><b>Delivery information</b><span>Times, fees and locations</span></span></button><button class="benefit" onclick="infoSheet('Returns','Demo orders can be reviewed in Order History. No real purchase is created.')"><span class="benefit-icon">↩</span><span><b>Returns & refunds</b><span>Learn about the demo policy</span></span></button><button class="benefit" onclick="toast('Support request drafted')"><span class="benefit-icon">💬</span><span><b>Contact support</b><span>Get help with your order</span></span></button></div>`)}
-function showAbout(){infoSheet('Ridwaan Mobile Store','A premium mobile shopping demo designed and built with HTML5, CSS3 and vanilla JavaScript. Version 2.0.0.')}
+function showAbout(){infoSheet('Ridwaan Mobile Store','A premium installable mobile shopping app designed and built with HTML5, CSS3 and vanilla JavaScript. Version 2.1.0.')}
 function logoutDemo(){openSheet(`<div class="sheet-head"><h2>Log out?</h2><button class="icon-btn close" onclick="closeSheet()">${icon('x')}</button></div><p class="sheet-note">Your account, orders and rewards remain saved. Only this session will end.</p><div class="sheet-actions"><button class="secondary-btn" onclick="closeSheet()">Cancel</button><button class="primary-btn" onclick="signOut()">Log Out</button></div>`)}
 
 function adminHeader(title,subtitle,action=''){
