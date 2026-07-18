@@ -7,12 +7,22 @@ A polished, mobile-first smartphone shopping demo built with HTML5, CSS3 and van
 ## Features
 
 - Home, Shop, Cart, Rewards and Profile screens
+- Sign up, sign in, password reset, persistent sessions and protected customer shopping
+- Role-aware Admin Control Center for inventory, orders, payments and users
+- Product add/edit/delete, user role management and account suspension
 - 12 searchable and filterable smartphones
 - Product details with storage, color and quantity options
 - Persistent cart, wishlist, rewards, orders, profile and theme using localStorage
 - Validated checkout flow and order success experience
 - Animated Gold membership rewards interface
 - Responsive phone-sized desktop presentation and dark mode
+
+## Demo accounts
+
+- Admin: `admin@ridwaanstore.com` / `Admin123!`
+- Customer: `demo@ridwaanstore.com` / `Demo123!`
+
+Authentication and payments are front-end demonstrations stored in the browser with `localStorage`; they do not process real payments.
 
 ## Run locally
 
