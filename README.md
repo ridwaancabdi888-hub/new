@@ -8,6 +8,7 @@ A polished, mobile-first smartphone shopping demo built with HTML5, CSS3 and van
 
 - Home, Shop, Cart, Rewards and Profile screens
 - Sign up, sign in, password reset, persistent sessions and protected customer shopping
+- Installable mobile PWA with Android/Samsung install prompt and offline app shell
 - Role-aware Admin Control Center for inventory, orders, payments and users
 - Product add/edit/delete, user role management and account suspension
 - 12 searchable and filterable smartphones
@@ -31,3 +32,7 @@ Open `index.html` in any modern browser. No build process or dependencies are re
 ## Deployment
 
 This is a static site. On Vercel, use the project root as the root directory and leave the build command empty.
+
+## Install on a phone
+
+Open the live site in Chrome or Samsung Internet and tap **Install Mobile App**. If the browser does not show the prompt, open its menu and choose **Add to Home screen** or **Install app**.
