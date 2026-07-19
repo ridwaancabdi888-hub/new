@@ -27,7 +27,23 @@ Authentication and payments are front-end demonstrations stored in the browser w
 
 ## Run locally
 
-Open `index.html` in any modern browser. No build process or dependencies are required.
+No dependencies or build process are required. Because service workers do not run reliably from `file://` URLs, use a local HTTP server when testing installation or offline PWA behavior.
+
+From the repository folder, run either:
+
+```bash
+python -m http.server 8000
+```
+
+or:
+
+```bash
+npx serve .
+```
+
+Then open `http://localhost:8000` for the Python server, or the URL printed by `serve`.
+
+For a quick UI-only preview, you can still open `index.html` directly in a modern browser, but PWA installation and offline caching may be unavailable.
 
 ## Deployment
 
