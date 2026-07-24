@@ -45,6 +45,12 @@ Then open `http://localhost:8000` for the Python server, or the URL printed by `
 
 For a quick UI-only preview, you can still open `index.html` directly in a modern browser, but PWA installation and offline caching may be unavailable.
 
+## Reset demo data
+
+The demo saves accounts, cart items, orders, rewards, preferences and admin changes in the browser. To return the app to its original demo state, clear the site's stored data in the browser and reload the page.
+
+In Chrome or Edge, open **Developer Tools → Application → Storage**, select **Clear site data**, then refresh. On a phone, clear the site's storage from the browser's site settings. This also removes the saved demo session, so sign in again with one of the demo accounts above.
+
 ## Deployment
 
 This is a static site. On Vercel, use the project root as the root directory and leave the build command empty.
